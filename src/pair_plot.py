@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-
 def main() -> None:
 	if not os.path.exists('../plots/pair_plot'):
 		os.makedirs('../plots/pair_plot')
