@@ -18,9 +18,10 @@ def main() -> None:
 	if not os.path.exists('../plots/scatter'):
 		os.makedirs('../plots/scatter')
 
-	for f, course in enumerate(data.columns.values[:]):
+	for f, course in enumerate(data.columns.values):
 		plt.figure(f)
 		fig, axes = plt.subplots(4, 3)
+		plt.subplots_adjust(hspace=0.4, wspace=0.4, top=0.945)
 		fig.set_figwidth(10)
 		fig.set_figheight(10)
 		i = 0
