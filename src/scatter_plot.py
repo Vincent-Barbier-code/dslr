@@ -24,14 +24,14 @@ def main() -> None:
     for f, course in enumerate(data.columns.values):
         plt.figure(f)
         fig, axes = plt.subplots(4, 3)
-        plt.subplots_adjust(hspace=0.4, wspace=0.4, top=0.945)
+        plt.subplots_adjust(hspace=0.4, wspace=0.4, top=0.945, right=0.85)
         fig.set_figwidth(10)
         fig.set_figheight(10)
         i = 0
-        for col in data.columns.values[:-1]:
+        for col in data.columns.values[:]:
             if col == course:
                 continue
-            l = sb.scatterplot(
+            sb.scatterplot(
                 data=data,
                 x=course,
                 y=col,
@@ -40,6 +40,16 @@ def main() -> None:
                 legend=False,
             )
             i += 1
+        offset = col == course
+        l = sb.scatterplot(
+            data=data,
+            x=course,
+            y=data.columns.values[-1 - offset],
+            hue=hues,
+            ax=axes[3, 2],
+            legend=True,
+        )
+        sb.move_legend(l, "upper left", bbox_to_anchor=(1.05, 3))
         fig.savefig("../plots/scatter/" + course + ".png")
         print(f"Saving {course}...")
         plt.close(f)
