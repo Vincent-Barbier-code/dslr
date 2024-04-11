@@ -1,15 +1,16 @@
 import numpy as np
 import csv
+import pandas as pd
 
 
 def sigmoid(x: np.ndarray) -> np.ndarray:
     """Sigmoid Function
 
     Args:
-                            x (np.ndarray): Array of value
+    x (np.ndarray): Array of value
 
     Returns:
-                            np.ndarray:
+    np.ndarray:
     """
     return 1 / (1 + np.exp(-x))
 
@@ -18,12 +19,12 @@ def cost_function(x: np.ndarray, y: np.ndarray, theta: np.ndarray) -> float:
     """Binary Cross Entropy Loss
 
     Args:
-                            x (np.ndarray): Predicted values
-                            y (np.ndarray): Target values
-                            theta (np.ndarray): Array of weights
+    x (np.ndarray): Predicted values
+    y (np.ndarray): Target values
+    theta (np.ndarray): Array of weights
 
     Returns:
-                            float: Cost value
+    float: Cost value
     """
     m = len(y)
     h = sigmoid(np.dot(x, theta))
@@ -41,29 +42,62 @@ class LogisticRegression:
         """Load saved weights
 
         Args:
-                        path (str): Path to weights file in csv format
+        path (str): Path to weights file in csv format
         """
         with open(path, "r") as file:
             reader = csv.reader(file)
             for i, row in enumerate(reader):
                 self.w[i] = np.array([float(v) for v in row])
 
-    def fit(self, x: np.ndarray, y: np.ndarray) -> None:
+    def batch(self, x: np.ndarray, y: np.ndarray, w: np.ndarray) -> None:
+        predictions = sigmoid(np.dot(x, w))
+        gradient = (1 / len(x)) * np.dot(x.T, (predictions - y))
+        w -= self.lr * gradient
+
+    def stochastic_gradient_descent(
+        self, x: pd.DataFrame, y: np.ndarray, w: np.ndarray
+    ) -> None:
+        for i in range(len(x)):
+            predictions = sigmoid(np.dot(x.values[i], w))
+            gradient = np.dot(x.values[i].T, (predictions - y[i]))
+            w -= self.lr * gradient
+
+    def mini_batch(self, x: np.ndarray, y: np.ndarray, w: np.ndarray) -> None:
+        batch_size = 256
+        for i in range(0, len(x), batch_size):
+            x_batch = x[i : i + batch_size]
+            y_batch = y[i : i + batch_size]
+            predictions = sigmoid(np.dot(x_batch, w))
+            gradient = (1 / len(x_batch)) * np.dot(x_batch.T, (predictions - y_batch))
+            w -= self.lr * gradient
+
+    def fit(self, x: np.ndarray, y: np.ndarray, method: str = "batch") -> None:
         """Train model with datas
 
         Args:
-                        x (np.ndarray): Input values
-                        y (np.ndarray): Target values
+        x (np.ndarray): Input values
+        y (np.ndarray): Target values
         """
+        func = None
+
+        match method:
+            case "batch":
+                func = self.batch
+            case "mini":
+                func = self.mini_batch
+            case "sto":
+                func = self.stochastic_gradient_descent
+            case _:
+                func = self.batch
         m, n = x.shape
         for house in np.unique(y):
             y_all = np.where(y == house, 1, 0)
-            w = np.random.rand(n)
+            w = np.random.rand(n) - 0.5
+            # w = np.zeros(n)
             for _ in range(self.epochs):
-                predictions = sigmoid(np.dot(x, w))
-                gradient = (1 / m) * np.dot(x.T, (predictions - y_all))
-                w -= self.lr * gradient
+                func(x, y_all, w)
             self.w[house] = w
+
         with open("weights.csv", "w") as file:
             writer = csv.writer(file, lineterminator="\n")
             for h in self.w:
@@ -73,11 +107,11 @@ class LogisticRegression:
         """Accuracy of predictions
 
         Args:
-                        X (np.ndarray): Predictions values
-                        y (np.ndarray): Target values
+        X (np.ndarray): Predictions values
+        y (np.ndarray): Target values
 
         Returns:
-                        float: Accuracy of correct value
+        float: Accuracy of correct value
         """
         return sum(self.predict(X) == y) / len(y)
 
@@ -85,10 +119,10 @@ class LogisticRegression:
         """Predict label with input values
 
         Args:
-                        X (np.ndarray): Input values
+        X (np.ndarray): Input values
 
         Returns:
-                        int: Preditected values
+        int: Preditected values
         """
         predictions = np.zeros((X.shape[0], len(self.w)))
         for i, theta in self.w.items():
