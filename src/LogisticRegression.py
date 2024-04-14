@@ -83,9 +83,9 @@ class LogisticRegression:
         match method:
             case "batch":
                 func = self.batch
-            case "mini":
+            case "mini_batch":
                 func = self.mini_batch
-            case "sto":
+            case "stochastic":
                 func = self.stochastic_gradient_descent
             case _:
                 func = self.batch
@@ -93,7 +93,6 @@ class LogisticRegression:
         for house in np.unique(y):
             y_all = np.where(y == house, 1, 0)
             w = np.random.rand(n) - 0.5
-            # w = np.zeros(n)
             for _ in range(self.epochs):
                 func(x, y_all, w)
             self.w[house] = w
