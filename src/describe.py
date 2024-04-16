@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from columnar import columnar
 import math
 
 
@@ -17,7 +16,7 @@ def percentile(values: np.ndarray, p: float) -> float:
 
     rank = (p / 100) * (len(values) + 1)
     if rank.is_integer():
-        return (values[int(rank)])
+        return values[int(rank)]
     f_rank = int(math.floor(rank))
     c_rank = int(math.ceil(rank))
     f_value = values[f_rank]
@@ -32,8 +31,19 @@ def get_statistics(dataframe: pd.DataFrame, statistics: dict) -> None:
                     dataframe (pd.DataFrame): dataframe
                     statistics (dict): dictionnary used to store stats
     """
-    fields = ["count", "mean", "std", "min",
-              "25%", "50%", "75%", "max", "unique", "freq", "range"]
+    fields = [
+        "count",
+        "mean",
+        "std",
+        "min",
+        "25%",
+        "50%",
+        "75%",
+        "max",
+        "unique",
+        "freq",
+        "range",
+    ]
     for field in fields:
         statistics[field] = []
 
@@ -61,8 +71,7 @@ def get_statistics(dataframe: pd.DataFrame, statistics: dict) -> None:
         statistics["75%"].append(format_number(percentile(values, 75)))
         statistics["max"].append(format_number(values[-1]))
         statistics["unique"].append(format_number(len(occurences)))
-        statistics["freq"].append(format_number(
-            (len(occurences) / count) * 100))
+        statistics["freq"].append(format_number((len(occurences) / count) * 100))
         statistics["range"].append(format_number(values[-1] - values[0]))
 
         # print(occurences)
@@ -84,7 +93,7 @@ def format_number(value: float) -> str:
     Returns:
                     str: formatted string
     """
-    return "{:>10.3f}".format(value)
+    return "{:>12.3f}".format(value)
 
 
 def format_stats(statistics: dict, field: str) -> list:
@@ -112,11 +121,11 @@ def describe(dataframe: pd.DataFrame) -> str:
     statistics = {}
     headers = []
     for header in dataframe.columns.values.tolist():
-        headers.append("{:>10}".format(
-            header[:9] + '.' if len(header) > 9 else header))
+        headers.append("{:>12}".format(header[:7] + "." if len(header) > 7 else header))
 
-    headers.insert(0, "{:<3}".format(''))
+    headers.insert(0, "")
     get_statistics(dataframe, statistics)
+
     data = [
         format_stats(statistics, "count"),
         format_stats(statistics, "unique"),
@@ -130,13 +139,17 @@ def describe(dataframe: pd.DataFrame) -> str:
         format_stats(statistics, "75%"),
         format_stats(statistics, "max"),
     ]
-    out = columnar(data, headers=headers, no_borders=True,
-                   preformatted_headers=True)
-    return (out)
+    out = ""
+
+    col_width = max(len(word) for word in headers) - 3
+    data.insert(0, headers)
+    for row in data:
+        out += ("".join(word.ljust(col_width) for word in row)) + "\n"
+    return out
 
 
 if __name__ == "__main__":
-    data = pd.read_csv('../datasets/dataset_train.csv')
+    data = pd.read_csv("../datasets/dataset_train.csv")
     data = data.select_dtypes(include=np.number)
     data.dropna(inplace=True)
     print(describe(data))

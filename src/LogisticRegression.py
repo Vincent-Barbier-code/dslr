@@ -50,6 +50,13 @@ class LogisticRegression:
                 self.w[i] = np.array([float(v) for v in row])
 
     def batch(self, x: np.ndarray, y: np.ndarray, w: np.ndarray) -> None:
+        """Batch gradient descent algorithm
+
+        Args:
+            x (np.ndarray): data to train with
+            y (np.ndarray): labels
+            w (np.ndarray): weights
+        """
         predictions = sigmoid(np.dot(x, w))
         gradient = (1 / len(x)) * np.dot(x.T, (predictions - y))
         w -= self.lr * gradient
@@ -57,12 +64,26 @@ class LogisticRegression:
     def stochastic_gradient_descent(
         self, x: pd.DataFrame, y: np.ndarray, w: np.ndarray
     ) -> None:
+        """Stochastic gradient descent algorithm
+
+        Args:
+            x (np.ndarray): data to train with
+            y (np.ndarray): labels
+            w (np.ndarray): weights
+        """
         for i in range(len(x)):
             predictions = sigmoid(np.dot(x.values[i], w))
             gradient = np.dot(x.values[i].T, (predictions - y[i]))
             w -= self.lr * gradient
 
     def mini_batch(self, x: np.ndarray, y: np.ndarray, w: np.ndarray) -> None:
+        """Mini Batch gradient descent algorithm
+
+        Args:
+            x (np.ndarray): data to train with
+            y (np.ndarray): labels
+            w (np.ndarray): weights
+        """
         batch_size = 256
         for i in range(0, len(x), batch_size):
             x_batch = x[i : i + batch_size]
@@ -75,8 +96,9 @@ class LogisticRegression:
         """Train model with datas
 
         Args:
-        x (np.ndarray): Input values
-        y (np.ndarray): Target values
+            x (np.ndarray): input values
+            y (np.ndarray): target values
+            method (str, optional): gradient descent algorithm used
         """
         func = None
 
