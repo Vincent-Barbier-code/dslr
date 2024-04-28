@@ -7,6 +7,7 @@ from extract import Extract
 
 
 def main() -> None:
+    np.random.seed(42)
     parser = argparse.ArgumentParser()
     parser.add_argument("path", type=str, help="path to the training dataset")
     parser.add_argument(

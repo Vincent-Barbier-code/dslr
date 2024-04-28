@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
+import argparse
 
 
 def percentile(values: np.ndarray, p: float) -> float:
@@ -62,26 +63,26 @@ def get_statistics(dataframe: pd.DataFrame, statistics: dict) -> None:
                 occurences[value] = 1
             else:
                 occurences[value] += 1
+        try:
+            statistics["count"].append(format_number(count))
+            statistics["mean"].append(format_number(total / count))
+            statistics["min"].append(format_number(values[0]))
+            statistics["25%"].append(format_number(percentile(values, 25)))
+            statistics["50%"].append(format_number(percentile(values, 50)))
+            statistics["75%"].append(format_number(percentile(values, 75)))
+            statistics["max"].append(format_number(values[-1]))
+            statistics["unique"].append(format_number(len(occurences)))
+            statistics["freq"].append(format_number((len(occurences) / count) * 100))
+            statistics["range"].append(format_number(values[-1] - values[0]))
 
-        statistics["count"].append(format_number(count))
-        statistics["mean"].append(format_number(total / count))
-        statistics["min"].append(format_number(values[0]))
-        statistics["25%"].append(format_number(percentile(values, 25)))
-        statistics["50%"].append(format_number(percentile(values, 50)))
-        statistics["75%"].append(format_number(percentile(values, 75)))
-        statistics["max"].append(format_number(values[-1]))
-        statistics["unique"].append(format_number(len(occurences)))
-        statistics["freq"].append(format_number((len(occurences) / count) * 100))
-        statistics["range"].append(format_number(values[-1] - values[0]))
-
-        # print(occurences)
-
-        sum = 0
-        for value in values:
-            if np.isnan(value):
-                continue
-            sum += (value - (total / count)) ** 2
-        statistics["std"].append(format_number(math.sqrt(sum / count)))
+            sum = 0
+            for value in values:
+                if np.isnan(value):
+                    continue
+                sum += (value - (total / count)) ** 2
+            statistics["std"].append(format_number(math.sqrt(sum / count)))
+        except:
+            exit("Unable to describe current dataset")
 
 
 def format_number(value: float) -> str:
@@ -149,7 +150,11 @@ def describe(dataframe: pd.DataFrame) -> str:
 
 
 if __name__ == "__main__":
-    data = pd.read_csv("../datasets/dataset_train.csv")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path", type=str, help="path to the dataset")
+    args = parser.parse_args()
+
+    data = pd.read_csv(args.path)
     data = data.select_dtypes(include=np.number)
     data.dropna(inplace=True)
     print(describe(data))
