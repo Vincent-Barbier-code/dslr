@@ -1,9 +1,6 @@
-import numpy as np
-import pandas as pd
 from LogisticRegression import LogisticRegression
 import csv
 import argparse
-import sys
 from extract import Extract
 
 
